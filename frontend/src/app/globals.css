@@ -1,0 +1,100 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --font-heading: "Playfair Display";
+  --font-body: "Inter";
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #f8f5ef;
+  color: #0b0b0b;
+  font-family: var(--font-body), Inter, Montserrat, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: #c8a24a;
+  color: #0b0b0b;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    text-rendering: geometricPrecision;
+  }
+}
+
+@layer components {
+  .premium-title {
+    @apply font-heading text-4xl font-semibold leading-tight text-luxury-black sm:text-5xl;
+  }
+
+  .premium-title-lg {
+    @apply font-heading text-5xl font-semibold leading-tight text-luxury-black sm:text-6xl lg:text-7xl;
+  }
+
+  .premium-eyebrow {
+    @apply text-sm font-semibold uppercase tracking-[0.08em] text-luxury-gold;
+  }
+
+  .premium-copy {
+    @apply leading-8 text-luxury-text;
+  }
+
+  .section-padding {
+    @apply px-5 py-12 sm:px-8 sm:py-16 lg:px-12;
+  }
+
+  .section-surface {
+    @apply bg-luxury-surface;
+  }
+
+  .luxury-panel {
+    @apply rounded-md border border-luxury-beige bg-white shadow-luxury-soft;
+  }
+
+  .luxury-panel-dark {
+    @apply rounded-md border border-luxury-black bg-luxury-dark text-luxury-ivory shadow-luxury;
+  }
+
+  .product-card-premium {
+    @apply rounded-md border border-luxury-beige bg-white shadow-luxury-soft transition duration-300 hover:-translate-y-1 hover:border-luxury-gold hover:shadow-luxury;
+  }
+
+  .btn-gold {
+    @apply inline-flex h-12 items-center justify-center rounded-md border border-luxury-gold bg-luxury-gold px-6 text-sm font-medium text-luxury-black shadow-luxury-gold transition hover:bg-luxury-black hover:text-luxury-ivory;
+  }
+
+  .btn-black {
+    @apply inline-flex h-12 items-center justify-center rounded-md border border-luxury-black bg-luxury-black px-6 text-sm font-medium text-luxury-ivory transition hover:border-luxury-gold hover:bg-luxury-gold hover:text-luxury-black;
+  }
+
+  .btn-soft {
+    @apply inline-flex h-12 items-center justify-center rounded-md border border-luxury-beige bg-luxury-ivory px-6 text-sm font-medium text-luxury-black transition hover:border-luxury-gold hover:bg-white;
+  }
+}
