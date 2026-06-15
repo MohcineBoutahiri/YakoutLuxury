@@ -7,19 +7,19 @@ const categories = [
   {
     name: "Robes",
     slug: "robes",
-    description: "Robes elegantes pour occasions premium.",
+    description: "Robes élégantes pour occasions premium.",
     imageUrl: "https://placehold.co/1200x1600/0B0B0B/C8A24A?text=Robes",
   },
   {
     name: "Vestes",
     slug: "vestes",
-    description: "Vestes structurees et pieces de saison.",
+    description: "Vestes structurées et pièces de saison.",
     imageUrl: "https://placehold.co/1200x1600/0B0B0B/C8A24A?text=Vestes",
   },
   {
     name: "Chemises",
     slug: "chemises",
-    description: "Chemises raffinees aux coupes modernes.",
+    description: "Chemises raffinées aux coupes modernes.",
     imageUrl: "https://placehold.co/1200x1600/0B0B0B/C8A24A?text=Chemises",
   },
   {
@@ -35,7 +35,7 @@ const products = [
     name: "Robe Saphir Noir",
     slug: "robe-saphir-noir",
     description:
-      "Robe fluide noire avec finitions dorees, pensee pour les soirees elegantes.",
+      "Robe fluide noire avec finitions dorées, pensée pour les soirées élégantes.",
     price: "1290.00",
     oldPrice: "1490.00",
     isFeatured: true,
@@ -54,7 +54,7 @@ const products = [
     name: "Veste Atlas Ivoire",
     slug: "veste-atlas-ivoire",
     description:
-      "Veste ivoire taillee avec une ligne nette et une presence contemporaine.",
+      "Veste ivoire taillée avec une ligne nette et une présence contemporaine.",
     price: "1890.00",
     oldPrice: null,
     isFeatured: true,
@@ -104,7 +104,7 @@ const products = [
     name: "Ceinture Or Signature",
     slug: "ceinture-or-signature",
     description:
-      "Ceinture noire avec boucle doree, concue comme accent signature.",
+      "Ceinture noire avec boucle dorée, conçue comme accent signature.",
     price: "390.00",
     oldPrice: null,
     isFeatured: false,
@@ -129,11 +129,30 @@ const products = [
   },
 ];
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 async function seedAdmin() {
-  const password = await bcrypt.hash("Admin123456", 12);
+  const adminEmail = process.env.SEED_ADMIN_EMAIL;
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    console.warn(
+      "SEED_ADMIN_EMAIL or SEED_ADMIN_PASSWORD missing. Admin seed skipped.",
+    );
+    return;
+  }
+
+  if (adminPassword.length < 8) {
+    throw new Error("SEED_ADMIN_PASSWORD must contain at least 8 characters.");
+  }
+
+  const email = normalizeEmail(adminEmail);
+  const password = await bcrypt.hash(adminPassword, 12);
 
   await prisma.user.upsert({
-    where: { email: "admin@yakoutluxury.com" },
+    where: { email },
     update: {
       firstName: "Yakout",
       lastName: "Admin",
@@ -145,23 +164,31 @@ async function seedAdmin() {
     create: {
       firstName: "Yakout",
       lastName: "Admin",
-      email: "admin@yakoutluxury.com",
+      email,
       password,
       role: Role.ADMIN,
       isVerified: true,
       isActive: true,
     },
   });
+
+  console.log(`Admin ready: ${email}`);
 }
 
 async function seedCategories() {
   for (const category of categories) {
     await prisma.category.upsert({
       where: { slug: category.slug },
-      update: category,
+      update: {
+        name: category.name,
+        description: category.description,
+        imageUrl: category.imageUrl,
+      },
       create: category,
     });
   }
+
+  console.log("Categories seeded.");
 }
 
 async function seedProducts() {
@@ -191,7 +218,12 @@ async function seedProducts() {
         },
         variants: {
           deleteMany: {},
-          create: product.variants,
+          create: product.variants.map((variant) => ({
+            size: variant.size.trim().toUpperCase(),
+            color: variant.color.trim(),
+            stock: variant.stock,
+            sku: variant.sku,
+          })),
         },
       },
       create: {
@@ -211,24 +243,36 @@ async function seedProducts() {
           })),
         },
         variants: {
-          create: product.variants,
+          create: product.variants.map((variant) => ({
+            size: variant.size.trim().toUpperCase(),
+            color: variant.color.trim(),
+            stock: variant.stock,
+            sku: variant.sku,
+          })),
         },
       },
     });
   }
+
+  console.log("Demo products seeded.");
 }
 
 async function main() {
   await seedAdmin();
   await seedCategories();
-  await seedProducts();
+
+  if (process.env.SEED_DEMO_PRODUCTS === "true") {
+    await seedProducts();
+  } else {
+    console.log("Demo products skipped. Set SEED_DEMO_PRODUCTS=true to seed them.");
+  }
 
   console.log("Yakout Luxury seed completed.");
 }
 
 main()
   .catch((error) => {
-    console.error(error);
+    console.error("Seed failed:", error);
     process.exit(1);
   })
   .finally(async () => {

@@ -32,7 +32,7 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(port);
+  await app.listen(port, "0.0.0.0");
   logger.log(`API running on http://localhost:${port}/api`);
 }
 
